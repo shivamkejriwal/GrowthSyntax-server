@@ -1,0 +1,22 @@
+{
+  "name": "GrowthSyntax-server",
+  "version": "1.0.0",
+  "description": "Server Side for growth syntax.",
+  "repository": "https://github.com/shivamkejriwal/GrowthSyntax-server.git",
+  "private": true,
+  "scripts": {},
+  "author": "Shivam Kejriwal",
+  "contributors": [
+    {
+      "name": "Shivam Kejriwal",
+      "email": "shivamkejriwal@gmail.com"
+    }
+  ],
+  "dependencies": {
+    "firebase": "^4.6.0",
+    "firebase-admin": "^5.4.3",
+    "underscore": "^1.8.3"
+  },
+  "devDependencies": {},
+  "engines": {}
+}

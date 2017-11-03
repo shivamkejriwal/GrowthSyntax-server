@@ -1,0 +1,6 @@
+{
+  "projects": {
+    "default": "growthsyntax",
+    "growthsyntax": "growthsyntax"
+  }
+}
