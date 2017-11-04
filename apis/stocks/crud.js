@@ -1,13 +1,12 @@
 const _ = require('underscore');
-const moment = require('moment');
-const Datastore = require('@google-cloud/datastore');
-const datastore = Datastore();
+const util = require('../utils');
 
-// [START config]
-// const datastore = Datastore({
-//   projectId: config.get('GCLOUD_PROJECT')
-// });
-const kind = 'Stock';
+const db = util.getFirebaseDB();
+const collection = db.collection('Companies');
+const Prices = 'Prices';
+
+const getDocument = (ticker) => collection.doc(ticker)
+                                        .collection(Prices).doc('closing-price');
 
 
 let getPreviousWorkday = () => {
@@ -22,82 +21,76 @@ let getPreviousWorkday = () => {
     return moment().subtract(diff, 'days').format('YYYY-MM-DD');
 }
 
-/*
- * id of type 'AAPL'
- * data of type {ticker, date}
- */
-let getKey = (id, data) => {
-    const obj = {
-        ticker: data.ticker || id,
-        date: data.date || getPreviousWorkday() ,
-    };
-    const key = datastore.key([kind, `${obj.ticker}_${obj.date}`]);
-    return key;
+
+let updateStock = (ticker, data) => {
+    const document = getDocument(ticker);
+    return document.set(data);
+}
+
+let createStock = (ticker, data) => {
+    return updateStock(ticker, data);
 }
 
 
-let getEntity = (id, data) => {
-    let key = getKey(id, data);
-    const entity = {
-        key,
-        data
-    };
-    return entity;
-}
-
-
-let updateStock = (id, data) => {
-    const entity = getEntity(id, data);
-    console.log('updateStock', entity);
-    return datastore.save(entity);
-}
-
-let createStock = (id, data) => {
-    return updateStock(id, data);
-}
-
-
-let readStock = (id, data) => {
-    const key = getKey(id, data);
-    return datastore.get(key);
-}
-
-let deleteStock = (id, data) => {
-    const key = getKey(id, data);
-    return datastore.delete(key);
-}
-
-let getList = (count) => {
-    let limit = count ? count : 1;
-    const query = datastore.createQuery(kind)
-        .limit(limit);
-    // TO DO: add better filters
-
-    return datastore.runQuery(query)
-        .then((results) => {
-            const entities = results[0];
-            return entities;
+let readStock = (ticker) => {
+    const document = getDocument(ticker);
+    return document.get()
+        .then(doc => {
+            if (!doc.exists) {
+                console.log('No such document!');
+            } else {
+                return doc.data();
+            }
+        })
+        .catch(err => {
+            console.log('Error getting document', err);
         });
 }
 
+let deleteStock = (ticker) => {
+    const document = getDocument(ticker);
+    return document.delete();
+}
+
+let getList = (count) => {
+    // let limit = count ? count : 1;
+    // const query = datastore.createQuery(kind)
+    //     .limit(limit);
+    // // TO DO: add better filters
+
+    // return datastore.runQuery(query)
+    //     .then((results) => {
+    //         const entities = results[0];
+    //         return entities;
+    //     });
+}
+
+
+const sendBatch = (dataList) => {
+    var batch = db.batch();
+    
+    _.each(dataList, (data) => {
+        const doc = getDocument(data.ticker);
+        batch.set(doc, data);
+    });
+    return batch.commit().then(() => {
+        console.log('Batch Complete');
+    });
+}
 
 /*
  * Takes a list of data in the format
  * [{ticker, date, price}, {ticker, date, price}, ...]
  */
 let createBatch = (dataList) => {
-    const entities = _.map(dataList, (stock) => {
-        const id = stock.ticker;
-        const entity = getEntity(id, stock);
-        return entity;
-    });
-    console.log(`Created entities:${entities.length}`);
+    
+    console.log(`Created entities:${dataList.length}`);
     return new Promise((resolve, reject) => {
         let count = 0;
         let requestChain = [];
-        while(entities.length) {
-            const batch = entities.splice(0,500);
-            requestChain.push(datastore.save(batch));
+        while(dataList.length) {
+            const batch = dataList.splice(0,500);
+            requestChain.push(sendBatch(batch));
         }
         console.log(`Created requestChain:${requestChain.length}`);
         Promise.all(requestChain)
@@ -109,7 +102,6 @@ let createBatch = (dataList) => {
                 console.log('createBatch-Error', err);
                 reject(err);
             });
-
     });
 }
 

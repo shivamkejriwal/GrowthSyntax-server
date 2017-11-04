@@ -3,30 +3,39 @@ const _ = require('underscore');
 const util = require('../utils');
 
 const db = util.getFirebaseDB();
-const collection = db.collection('company-profiles');
+const collection = db.collection('Companies');
+const Profile = 'Profile';
 
-let getKey = (ticker) => {
-    return ticker;
-}
+const getDocument = (ticker) => collection.doc(ticker)
+                                        .collection(Profile).doc('Data');
 
 let updateCompanyProfiles = (ticker, data) => {
-    // const entity = getEntity(ticker, data);
-    // console.log('updateCompanyProfiles', entity);
-    // return datastore.save(entity);
+    const document = getDocument(ticker);
+    return document.set(data);
 }
 
 let createCompanyProfiles = (ticker, data) => {
-    // return updateCompanyProfiles(ticker, data);
+    return updateCompanyProfiles(ticker, data);
 }
 
 let readCompanyProfiles = (ticker) => {
-    // const key = getKey(ticker);
-    // return datastore.get(key);
+    const document = getDocument(ticker);
+    return document.get()
+        .then(doc => {
+            if (!doc.exists) {
+                console.log('No such document!');
+            } else {
+                return doc.data();
+            }
+        })
+        .catch(err => {
+            console.log('Error getting document', err);
+        });
 }
 
 let deleteCompanyProfiles = (ticker) => {
-    // const key = getKey(ticker);
-    // return datastore.delete(key);
+    const document = getDocument(ticker);
+    return document.delete();
 }
 
 let getList = (ticker, limit) => {
@@ -48,7 +57,7 @@ const sendBatch = (dataList) => {
     var batch = db.batch();
     
     _.each(dataList, (profile) => {
-        const doc = collection.doc(profile.ticker);
+        const doc = getDocument(profile.ticker);
         batch.set(doc, profile);
     });
     return batch.commit().then(() => {

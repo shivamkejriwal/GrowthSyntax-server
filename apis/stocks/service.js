@@ -30,7 +30,7 @@ let successHandler = (result) => {
     });
 
     const data = _.map(result.datatable.data, (arr) => {
-        const price = parseFloat(arr[columns.adj_close]).toFixed(2);
+        const price = util.round(arr[columns.adj_close], 2);
         return {
             ticker: arr[columns.ticker],
             date: arr[columns.date],
@@ -38,6 +38,7 @@ let successHandler = (result) => {
         }
     });
     console.log(`Found Stocks:${data.length}`);
+    console.log('Stock Data[0]', data[0]);
     crud.createBatch(data);
 }
 
@@ -67,4 +68,4 @@ let populateDays = (days) => {
         });
 }
 
-// populateDays(1);
+populateDays(1);

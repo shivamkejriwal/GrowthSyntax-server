@@ -8,6 +8,10 @@ const config = require('../config.js');
 //   console.log(body.explanation);
 // });
 
+const round = (value, precision) => {
+    const multiplier = Math.pow(10, precision);
+    return Math.round(value * multiplier) / multiplier;
+}
 
 let paramsToObj = (str) => {
     return querystring.parse(str);
@@ -42,6 +46,7 @@ const getFirebaseDB = () => {
 }
 
 module.exports = {
+    round,
     getData,
     getFirebaseDB
 };
