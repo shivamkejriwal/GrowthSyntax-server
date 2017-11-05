@@ -40,7 +40,7 @@ let saveToDatastore = (data) => {
         });
 };
 
-// builder.build('WMT', (data) => {
+// builder.build('ATVI', (data) => {
 //     console.log(data);
 //     // saveToDatastore(data);
 // });

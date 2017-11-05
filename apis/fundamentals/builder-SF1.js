@@ -14,6 +14,7 @@ const indicators = [
     'SHARESWA', // Weighted Average Shares
     'NETINC', // Net Income
     'REVENUE',
+    'EBIT',
     'COR', // Cost of Revenue
     'GP', // Gross Profit
     'ASSETS',
@@ -78,6 +79,7 @@ let successHandler = (result, data, done) => {
             valueMap[key] = value;
         });
         const date = valueMap.DATE;
+        delete valueMap.DATE;
         data.dates.push(date);
         data[date] = valueMap;
         
