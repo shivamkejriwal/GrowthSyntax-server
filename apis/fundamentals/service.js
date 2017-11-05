@@ -1,7 +1,8 @@
 const moment = require('moment');
 const _ = require('underscore');
 const crud = require('./crud');
-const builder = require('./builder');
+// const builder = require('./builder');
+const builder = require('./builder-SF1');
 
 
 const tickers = [
@@ -40,15 +41,15 @@ let saveToDatastore = (data) => {
 };
 
 // builder.build('WMT', (data) => {
-//     // console.log(data);
-//     saveToDatastore(data);
+//     console.log(data);
+//     // saveToDatastore(data);
 // });
 
-// _.each(tickers, (ticker) => {
-//     builder.build(ticker, (data) => {
-//         saveToDatastore(data);
-//     });
-// });
+_.each(tickers, (ticker) => {
+    builder.build(ticker, (data) => {
+        saveToDatastore(data);
+    });
+});
 
 // crud.read('WMT', '2017-01-31')
 // .then((result) => {

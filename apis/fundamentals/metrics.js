@@ -54,7 +54,7 @@ const ROIC = (netIncome, investedCapital) => {
     return parseFloat(result.toFixed(8));
 }
 
-const assetTurnover = (revenue, assets) => {
+const ASSETTURNOVER = (revenue, assets) => {
     if (!revenue) return '';
     if (!assets) return '';
     const result = parseFloat(revenue)/parseFloat(assets);
@@ -70,14 +70,14 @@ const NETMARGIN = (netIncome, revenue) => {
 
 const populate = (data) => {
     data.PE = PE(data.PRICE, data.EPS);
-    data.PB = PB(data.PRICE, data.BVPS);
-    data.DIVYIELD = DIVYIELD(data.DPS, data.PRICE);
+    // data.PB = PB(data.PRICE, data.BVPS);
+    // data.DIVYIELD = DIVYIELD(data.DPS, data.PRICE);
     data.PAYOUTRATIO = PAYOUTRATIO(data.DPS, data.EPS);
     data.ROE = ROE(data.NETINC, data.EQUITY);
     data.ROA = ROA(data.NETINC, data.ASSETS);
     data.ROCE = ROCE(data.NETINC, data.LIABILITIESNC);
     data.ROIC = ROCE(data.NETINC, data.INVCAP);
-    data.assetTurnover = ROCE(data.REVENUE, data.ASSETS);
+    data.ASSETTURNOVER = ROCE(data.REVENUE, data.ASSETS);
     data.NETMARGIN = ROCE(data.NETINC, data.REVENUE);
 }
 
