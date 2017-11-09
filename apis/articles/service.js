@@ -1,4 +1,5 @@
 const request = require('request');
+const xml2json = require('xml2json');
 const moment = require('moment');
 const _ = require('underscore');
 const querystring = require('querystring');
@@ -8,20 +9,19 @@ const crud = require('./crud');
 const config = require('../../config.js');
 const apiKey = config.mercury.api_key;
 
-const url = 'https://mercury.postlight.com/parser?';
+const mercuryUrl = 'https://mercury.postlight.com/parser?';
 const headers = {
     'Content-Type': 'application/json',
     'x-api-key': apiKey
 }
 
 
-const getUrl = () => {
+const getUrl = (uri) => {
     const dateStr = moment().format('MM-D-YYYY');
-    const params = {
-        url: `http://investor.valueline.com/blog/stock-market-today-${dateStr}`
-    };
+    const url = uri ? uri :  `http://investor.valueline.com/blog/stock-market-today-${dateStr}`;
+    const params = { url };
     const qs = querystring.stringify(params);
-    return `${url}${qs}`;
+    return `${mercuryUrl}${qs}`;
 }
 
 const htmlToString = (html) => {
@@ -46,9 +46,51 @@ const callBack = (err, res, body)=> {
 }
 
 
-const options = {
-    headers,
-    url: getUrl(),
-    method: 'GET'
+// const options = {
+//     headers,
+//     url: getUrl(),
+//     method: 'GET'
+// }
+// request(options, callBack);
+
+
+const loadRssData = (item, done) => {
+    const article = {
+        title : item.title,
+        url: item.link,
+        category: item.category,
+        date: moment(item.pubDate).format('DD-MM-YYYY'),
+        author: 'valueline.com'
+    };
+    const options = {
+        headers,
+        url: getUrl(item.link),
+        method: 'GET'
+    };
+
+    request(options, (err, res, body) => {
+        if (!err) {
+            const data = JSON.parse(body);
+            article.content = htmlToString(data.content);
+            done(article);
+        }
+    });
 }
-request(options, callBack);
+
+request('http://investor.valueline.com/blog/rss.xml', (err, res, body) => {
+    const data = xml2json.toJson(body);
+    const json = JSON.parse(data);
+    const rss = json.rss;
+    const items = rss.channel.item;
+
+    const articles = [];
+    const done = (article) => {
+        articles.push(article);
+        if (articles.length >= items.length){
+            console.log(`done: ${articles.length}`);
+            crud.createBatch(articles);
+        } 
+    }
+
+    _.each(items, (item) => loadRssData(item, done));    
+});
