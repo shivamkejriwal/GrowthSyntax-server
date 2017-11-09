@@ -16,7 +16,8 @@ const tickers = [
     'V',
     'DIS',
     'MAT',
-    'NKE'
+    'NKE',
+    'PYPL'
 ];
 
 
@@ -39,7 +40,7 @@ let saveToDatastore = (data) => {
         });
 };
 
-// builder.build('WMT', (data) => {
+// builder.build('PYPL', (data) => {
 //     // console.log(data);
 //     saveToDatastore(data);
 // });

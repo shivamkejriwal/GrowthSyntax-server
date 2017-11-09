@@ -11,7 +11,11 @@ const getDocument = (ticker) => collection.doc(ticker)
 
 let updateCompanyProfiles = (ticker, data) => {
     const document = getDocument(ticker);
-    return document.set(data);
+    const doc = collection.doc(ticker);
+    return doc.set({
+                ticker, 
+                name: data.name
+            }).then(document.set(data));
 }
 
 let createCompanyProfiles = (ticker, data) => {
@@ -52,13 +56,19 @@ let getList = (ticker, limit) => {
     //     });
 }
 
-
 const sendBatch = (dataList) => {
     var batch = db.batch();
     
     _.each(dataList, (profile) => {
-        const doc = getDocument(profile.ticker);
-        batch.set(doc, profile);
+        const ticker = profile.ticker;
+        const name = profile.name;
+
+        const rootDoc = collection.doc(ticker);
+        const rootData = { ticker, name };
+        const finalDoc = getDocument(ticker);
+
+        batch.set(rootDoc, rootData);
+        batch.set(finalDoc, profile);
     });
     return batch.commit().then(() => {
         console.log('Batch Complete');
@@ -76,7 +86,7 @@ let createBatch = (dataList) => {
         let count = 0;
         let requestChain = [];
         while(dataList.length) {
-            const batch = dataList.splice(0,500);
+            const batch = dataList.splice(0,250);
             requestChain.push(sendBatch(batch));
         }
         console.log(`Created requestChain:${requestChain.length}`);

@@ -13,6 +13,7 @@ const indicators = [
     'reportperiod',
     'SHARESWA', // Weighted Average Shares
     'NETINC', // Net Income
+    'RETEARN', // Retained Earnings
     'REVENUE',
     'EBIT',
     'COR', // Cost of Revenue
@@ -31,6 +32,7 @@ const indicators = [
     'NCFI', // Net Cash Flow from Investing
     'NCFO', // Net Cash Flow from Operations
     'NCFF', // Net Cash Flow from Financing
+    'NCFDIV',
     'NCFDEBT', // Issuance (Repayment) of Debt Securities
     'INVCAP', // Invested Capital
     'CAPEX', // Capital Expenditure
@@ -98,6 +100,7 @@ let build = (ticker, complete) => {
         ticker,
         dimension,
         api_key: apiKey,
+        'calendardate.gte': '2005-12-31',
         'qopts.columns': indicators.toString()
     };
 

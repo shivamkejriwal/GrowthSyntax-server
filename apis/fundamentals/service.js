@@ -17,7 +17,8 @@ const tickers = [
     'V',
     'DIS',
     'MAT',
-    'NKE'
+    'NKE',
+    'PYPL'
 ];
 
 
@@ -40,16 +41,16 @@ let saveToDatastore = (data) => {
         });
 };
 
-// builder.build('ATVI', (data) => {
-//     console.log(data);
-//     // saveToDatastore(data);
-// });
-
-_.each(tickers, (ticker) => {
-    builder.build(ticker, (data) => {
-        saveToDatastore(data);
-    });
+builder.build('VFC', (data) => {
+    // console.log(data);
+    saveToDatastore(data);
 });
+
+// _.each(tickers, (ticker) => {
+//     builder.build(ticker, (data) => {
+//         saveToDatastore(data);
+//     });
+// });
 
 // crud.read('WMT', '2017-01-31')
 // .then((result) => {

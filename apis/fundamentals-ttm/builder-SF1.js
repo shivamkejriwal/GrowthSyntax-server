@@ -67,7 +67,7 @@ let build = (ticker, complete) => {
         ticker,
         dates : []
     };
-    const dimension = 'ART';
+    const dimension = 'MRT';
     const params = {
         ticker,
         dimension,
