@@ -18,7 +18,7 @@ const headers = {
 
 const getUrl = (uri) => {
     const dateStr = moment().format('MM-D-YYYY');
-    const url = uri ? uri :  `http://investor.valueline.com/blog/stock-market-today-${dateStr}`;
+    const url = uri ? uri :  'http://investor.valueline.com/blog/stock-market-today-11-1-2017';//`http://investor.valueline.com/blog/stock-market-today-${dateStr}`;
     const params = { url };
     const qs = querystring.stringify(params);
     return `${mercuryUrl}${qs}`;
@@ -32,17 +32,30 @@ const htmlToString = (html) => {
     return noExtraLines;
 }
 
+const extractHtml = (html) => {
+    const $ = cheerio.load(html);
+    const links = $('a');
+    $(links).each(function(i, link){
+        const href = $(link).attr('href');
+        const text = $(link).text();
+        $(link).removeAttr("href");
+    });
+    return $.html();
+}
+
 const callBack = (err, res, body)=> {
     const resultFound = Boolean(!err && body);
     const data = JSON.parse(body);
     if (resultFound && data && data.content) {
         const result = {
             title: htmlToString(data.title), 
-            content: htmlToString(data.content), 
+            content: extractHtml(data.content),
             excerpt: htmlToString(data.excerpt)
         }
-        console.log(result);
-    }   
+        // console.log(result);
+    } else {
+        console.log(body);
+    }
 }
 
 
@@ -71,7 +84,8 @@ const loadRssData = (item, done) => {
     request(options, (err, res, body) => {
         if (!err) {
             const data = JSON.parse(body);
-            article.content = htmlToString(data.content);
+            article.content = extractHtml(data.content);
+            // article.content = htmlToString(data.content);
             done(article);
         }
     });
@@ -94,3 +108,8 @@ request('http://investor.valueline.com/blog/rss.xml', (err, res, body) => {
 
     _.each(items, (item) => loadRssData(item, done));    
 });
+
+const valueline = 'http://investor.valueline.com/blog/rss.xml';
+const pimco = 'https://blog.pimco.com/en/feed';
+const blackrock = 'https://www.blackrockblog.com/feed/';
+const vanguard = 'https://vanguardblog.com/category/economy-markets/feed/';
