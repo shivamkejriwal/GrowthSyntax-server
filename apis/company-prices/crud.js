@@ -5,32 +5,27 @@ const db = util.getFirebaseDB();
 const collection = db.collection('Companies');
 const Prices = 'Prices';
 
-const getDocument = (ticker) => collection.doc(ticker)
-                                        .collection(Prices).doc('closing-price');
+const getDocument = (ticker) => collection.doc(ticker);
+                                        // .collection(Prices).doc('closing-price');
 
-
-let getPreviousWorkday = () => {
-    let day = moment().format('dddd');
-    let diff = 0
-    if (day === 'Sunday') {
-        diff = 2;
-    }
-    if (day === 'Saturday') {
-        diff = 1;
-    };
-    return moment().subtract(diff, 'days').format('YYYY-MM-DD');
+const fixData = (data) => {
+    const keys = ['mostTraded', 'mostSold', 'mostBought'];
+    _.each(keys, key => {
+        data[key] = data[key] ? data[key] : false;
+    });
 }
-
 
 let updateStock = (ticker, data) => {
     const document = getDocument(ticker);
-    return document.set(data);
+    fixData(data);
+    return document.update(data);
 }
 
 let createStock = (ticker, data) => {
-    return updateStock(ticker, data);
+    const document = getDocument(ticker);
+    fixData(data);
+    return document.set(data);
 }
-
 
 let readStock = (ticker) => {
     const document = getDocument(ticker);
@@ -71,7 +66,9 @@ const sendBatch = (dataList) => {
     
     _.each(dataList, (data) => {
         const doc = getDocument(data.ticker);
-        batch.set(doc, data);
+        fixData(data);
+        batch.update(doc, data);
+        // batch.set(doc, data);
     });
     return batch.commit().then(() => {
         console.log('Batch Complete');
