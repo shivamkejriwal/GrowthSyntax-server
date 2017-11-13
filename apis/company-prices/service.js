@@ -42,7 +42,9 @@ const successHandler = (result) => {
     });
     analysis.doAnalysis(resultsMap, 10);
     const results = _.values(resultsMap);
-    // console.log('results', results);
+    const batch = results.splice(0,10);
+    // console.log('Datasets', batch);
+    // console.log(`Count: ${batch.length}`);
     crud.createBatch(results);
 }
     

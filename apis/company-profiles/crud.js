@@ -6,16 +6,18 @@ const db = util.getFirebaseDB();
 const collection = db.collection('Companies');
 const Profile = 'Profile';
 
-const getDocument = (ticker) => collection.doc(ticker)
-                                        .collection(Profile).doc('Data');
+const getDocument = (ticker) => collection.doc(ticker);
+                                        // .collection(Profile).doc('Data');
+const getProfile = (data) => _.omit(data, ['ticker']) ;
 
-let updateCompanyProfiles = (ticker, data) => {
-    const document = getDocument(ticker);
-    const doc = collection.doc(ticker);
-    return doc.set({
-                ticker, 
-                name: data.name
-            }).then(document.set(data));
+let updateCompanyProfiles = (data) => {
+    const document = getDocument(data.ticker);
+    const profile = getProfile(data);
+    const payload = {
+        name: profile.name,
+        profile: profile
+    };
+    return document.update(payload);
 }
 
 let createCompanyProfiles = (ticker, data) => {
@@ -59,16 +61,17 @@ let getList = (ticker, limit) => {
 const sendBatch = (dataList) => {
     var batch = db.batch();
     
-    _.each(dataList, (profile) => {
-        const ticker = profile.ticker;
-        const name = profile.name;
+    _.each(dataList, (data) => {
+        const ticker = data.ticker;
 
-        const rootDoc = collection.doc(ticker);
-        const rootData = { ticker, name };
-        const finalDoc = getDocument(ticker);
+        const document = getDocument(data.ticker);
+        const profile = getProfile(data);
+        const payload = {
+            name: profile.name,
+            profile: profile
+        };
 
-        batch.set(rootDoc, rootData);
-        batch.set(finalDoc, profile);
+        batch.set(document, payload);
     });
     return batch.commit().then(() => {
         console.log('Batch Complete');
@@ -86,7 +89,7 @@ let createBatch = (dataList) => {
         let count = 0;
         let requestChain = [];
         while(dataList.length) {
-            const batch = dataList.splice(0,250);
+            const batch = dataList.splice(0,500);
             requestChain.push(sendBatch(batch));
         }
         console.log(`Created requestChain:${requestChain.length}`);

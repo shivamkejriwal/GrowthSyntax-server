@@ -18,10 +18,17 @@ const build = (resultsMap) => {
     return companies;
 }
 
-const populate = (resultsMap, list, key) => {
+const populateKey = (resultsMap, list, key) => {
     _.each(list, item => {
         resultsMap[item.ticker][key] = true;
-        console.log(`populate ${item.ticker}: ${key}`);
+        console.log(`populateKey ${item.ticker}: ${key}`);
+    });
+}
+
+const populateValue = (resultsMap, list, key) => {
+    _.each(list, item => {
+        resultsMap[item.ticker][key] = item[key];
+        console.log(`populateValue ${item.ticker}: ${key}`);
     });
 }
 
@@ -32,9 +39,10 @@ const doAnalysis = (resultsMap, limit) => {
     const mostTraded = _.last(sortedByVolume, limit);
     const mostSold = _.first(sortedByChange, limit);
     const mostBought = _.last(sortedByChange, limit);
-    populate(resultsMap, mostTraded, 'mostTraded');
-    populate(resultsMap, mostSold, 'mostSold');
-    populate(resultsMap, mostBought, 'mostBought');
+    populateKey(resultsMap, mostTraded, 'mostTraded');
+    populateKey(resultsMap, mostSold, 'mostSold');
+    populateKey(resultsMap, mostBought, 'mostBought');
+    // populateValue(resultsMap, companies, 'change');
     // console.log('Market sortedByVolume', mostTraded);
     // console.log('Market sortedByChange-Sold', mostSold);
     // console.log('Market sortedByChange-Bought', mostBought);
